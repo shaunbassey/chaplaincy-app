@@ -1,6 +1,7 @@
 {
-  "name": "CHAPLAIN APP",
-  "description": "A comprehensive attendance tracking system for All Nations University devotions and chapel services, featuring mark calculation, AI insights, and administrative dashboards.",
+  "name": "ANU Chaplaincy Hub",
+  "short_name": "ANU Chaplain",
+  "description": "Secure attendance tracking and spiritual analytics system for All Nations University. Empowering students and the Chaplaincy office through cloud-synced optical identity verification.",
   "requestFramePermissions": [
     "camera"
   ]

@@ -1,11 +1,9 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+import { initializeApp, getApp, getApps } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+
+// ANU Devotion System Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyB4aZRqB5llk9VoP40ZBZ9J-8DLIh7zHUw",
   authDomain: "chaplaincy-app.firebaseapp.com",
@@ -16,6 +14,11 @@ const firebaseConfig = {
   measurementId: "G-4GSHL8PLHG"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+// Singleton initialization pattern to prevent multiple instances
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+
+// Export services for application-wide use
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+export default app;

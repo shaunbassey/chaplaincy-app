@@ -48,7 +48,7 @@
       background: #94a3b8;
     }
 
-    /* Fix for html5-qrcode internal styling to match our UI */
+    /* QR Scanner UI Overrides */
     #reader__scan_region video {
       border-radius: 2rem !important;
       object-fit: cover !important;
@@ -68,6 +68,11 @@
     }
     .dark .glass-card {
       background: rgba(15, 23, 42, 0.7);
+    }
+
+    /* Smooth Transitions */
+    .transition-theme {
+      transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
     }
   </style>
 <script type="importmap">
@@ -91,7 +96,7 @@
 }
 </script>
 </head>
-<body class="bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-500">
+<body class="bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-theme overflow-x-hidden">
   <div id="root"></div>
 </body>
 </html>
