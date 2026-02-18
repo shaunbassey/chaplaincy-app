@@ -3,7 +3,7 @@ import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// ANU Devotion System Firebase Configuration updated with user provided key
+// ANU Devotion System Firebase Configuration 
 const firebaseConfig = {
   apiKey: "AIzaSyCaoJEsCSSZT4PhcVROlxkVc2xPUoxmYFQ",
   authDomain: "chaplaincy-app.firebaseapp.com",
@@ -14,10 +14,9 @@ const firebaseConfig = {
   measurementId: "G-4GSHL8PLHG"
 };
 
-// Singleton initialization pattern to prevent multiple instances
+// Initialize Firebase once
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Export services for application-wide use
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
