@@ -1,4 +1,3 @@
-
 import { SemesterStats, SessionType } from './types';
 
 export const UNIVERSITY_NAME = "All Nations University";
@@ -15,6 +14,14 @@ export const SEMESTER_CONFIG: SemesterStats = {
 
 export const DEVOTION_DAYS = ['Monday', 'Tuesday', 'Thursday', 'Friday'];
 export const CHAPEL_DAY = 'Wednesday';
+
+export const FULL_SCHEDULE = [
+  { day: 'Monday', type: SessionType.DEVOTION, time: '8:00 AM' },
+  { day: 'Tuesday', type: SessionType.DEVOTION, time: '8:00 AM' },
+  { day: 'Wednesday', type: SessionType.CHAPEL, time: '10:00 AM' },
+  { day: 'Thursday', type: SessionType.DEVOTION, time: '8:00 AM' },
+  { day: 'Friday', type: SessionType.DEVOTION, time: '8:00 AM' },
+];
 
 export const DEPARTMENTS = [
   'Computer Science',
