@@ -1,5 +1,24 @@
 
 import { DEPARTMENTS } from '../constants';
+import { auth, db } from '../firebase';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  User as FirebaseUser
+} from 'firebase/auth';
+import { 
+  doc, 
+  setDoc, 
+  getDoc, 
+  updateDoc, 
+  collection, 
+  query, 
+  where, 
+  getDocs,
+  Timestamp
+} from 'firebase/firestore';
 
 export interface UserProfile {
   id: string;
@@ -7,150 +26,77 @@ export interface UserProfile {
   surname: string;
   email: string;
   indexNumber: string;
-  qrToken: string; // Unique cryptographic token for QR scanning
+  qrToken: string;
   department: string;
   semester: string;
-  password?: string;
   role: 'student' | 'admin';
   isApproved: boolean;
-  createdAt: string;
-  profilePicture?: string; 
+  createdAt: any;
+  profilePicture?: string;
+  attendanceCount?: number;
 }
 
-const STORAGE_KEY = 'anu_users_db';
-const PENDING_KEY = 'anu_pending_admins';
-const SESSION_KEY = 'anu_current_session';
+const SESSION_KEY = 'anu_current_session_profile';
 
 const generateToken = () => `ANU-SEC-${Math.random().toString(36).substring(2, 7).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
-const PRESEEDED_USERS: UserProfile[] = [
-  {
-    id: 'admin-bassey',
-    firstName: 'Bassey',
-    surname: 'Shaun',
-    email: 'basseyshaun@gmail.com',
-    indexNumber: 'ANU24420005',
-    qrToken: 'ANU-SEC-AUTH-ADMIN-01',
-    department: 'Computer Engineering',
-    semester: 'Level 400',
-    password: '123456789',
-    role: 'admin',
-    isApproved: true,
-    createdAt: '2024-01-01T00:00:00.000Z'
-  },
-  {
-    id: 'student-kwame',
-    firstName: 'Kwame',
-    surname: 'Mensah',
-    email: 'kwame@anu.edu.gh',
-    indexNumber: 'ANU24420001',
-    qrToken: 'ANU-SEC-TOKEN-7Y2P9',
-    department: 'Computer Science',
-    semester: 'Level 100',
-    password: 'password123',
-    role: 'student',
-    isApproved: true,
-    createdAt: '2024-01-01T00:00:00.000Z'
-  },
-  {
-    id: 'student-akoto',
-    firstName: 'Akoto',
-    surname: 'User',
-    email: 'shaunbasseys@gmail.com',
-    indexNumber: 'ANU24420010',
-    qrToken: 'ANU-SEC-TOKEN-X8R4Q',
-    department: 'Computer Science',
-    semester: 'Semester One',
-    password: '1234567890',
-    role: 'student',
-    isApproved: true,
-    createdAt: '2024-05-20T10:00:00.000Z'
-  }
-];
-
 export const authService = {
   register: async (data: any): Promise<UserProfile> => {
+    const { email, password, ...rest } = data;
+    
+    // 1. Create user in Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // 2. Prepare Profile
     const newUser: UserProfile = {
-      id: Math.random().toString(36).substr(2, 9),
-      ...data,
-      qrToken: generateToken(),
-      isApproved: data.role === 'student',
-      createdAt: new Date().toISOString(),
+      id: user.uid,
+      email: email,
+      firstName: rest.firstName,
+      surname: rest.surname,
+      indexNumber: rest.indexNumber,
+      qrToken: rest.role === 'student' ? generateToken() : 'N/A',
+      department: rest.department,
+      semester: rest.semester,
+      role: rest.role,
+      isApproved: rest.role === 'student', // Students auto-approved for this prototype, admins need approval
+      createdAt: Timestamp.now(),
+      profilePicture: rest.profilePicture || '',
+      attendanceCount: rest.role === 'student' ? 0 : undefined
     };
 
-    if (data.role === 'admin' && data.requestAdminApproval) {
-      const pending = authService.getPendingAdmins();
-      localStorage.setItem(PENDING_KEY, JSON.stringify([...pending, newUser]));
-    } else {
-      const users = authService.getStoredUsers();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([...users, newUser]));
-    }
+    // 3. Save to Firestore
+    await setDoc(doc(db, "users", user.uid), newUser);
 
     return newUser;
   },
 
-  getStoredUsers: (): UserProfile[] => {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  },
-
-  getAllUsers: (): UserProfile[] => {
-    const stored = authService.getStoredUsers();
-    const all = [...PRESEEDED_USERS];
-    stored.forEach(u => {
-      if (!all.some(p => p.email === u.email)) {
-        all.push(u);
-      }
-    });
-    return all;
-  },
-
-  getPendingAdmins: (): UserProfile[] => {
-    const data = localStorage.getItem(PENDING_KEY);
-    return data ? JSON.parse(data) : [];
-  },
-
-  approveAdmin: async (userId: string): Promise<void> => {
-    const pending = authService.getPendingAdmins();
-    const userToApprove = pending.find(u => u.id === userId);
+  login: async (email: string, password?: string): Promise<UserProfile | null> => {
+    if (!password) throw new Error("Password required");
     
-    if (userToApprove) {
-      const updatedUser = { ...userToApprove, isApproved: true };
-      const users = authService.getStoredUsers();
-      
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([...users, updatedUser]));
-      localStorage.setItem(PENDING_KEY, JSON.stringify(pending.filter(u => u.id !== userId)));
-    }
-  },
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-  rejectAdmin: async (userId: string): Promise<void> => {
-    const pending = authService.getPendingAdmins();
-    localStorage.setItem(PENDING_KEY, JSON.stringify(pending.filter(u => u.id !== userId)));
-  },
-
-  login: async (email: string, password?: string, indexNumber?: string): Promise<UserProfile | null> => {
-    const users = authService.getAllUsers();
-    
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    
-    if (!user) {
-      const pending = authService.getPendingAdmins();
-      if (pending.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-        throw new Error("Approval Pending");
-      }
-      return null;
+    // Fetch profile from Firestore
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (!userDoc.exists()) {
+      throw new Error("Profile not found");
     }
 
-    if (indexNumber && user.indexNumber.toUpperCase() !== indexNumber.toUpperCase()) {
-      return null;
+    const profile = userDoc.data() as UserProfile;
+    
+    if (profile.role === 'admin' && !profile.isApproved) {
+      await signOut(auth);
+      throw new Error("Admin approval pending. Please contact Chaplaincy Office.");
     }
 
-    if (user.password && password && user.password !== password) {
-      throw new Error("Invalid password.");
-    }
-    
-    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    return user;
+    localStorage.setItem(SESSION_KEY, JSON.stringify(profile));
+    return profile;
+  },
+
+  logout: async () => {
+    await signOut(auth);
+    localStorage.removeItem(SESSION_KEY);
   },
 
   getCurrentUser: (): UserProfile | null => {
@@ -158,28 +104,31 @@ export const authService = {
     return session ? JSON.parse(session) : null;
   },
 
-  updateProfile: (data: Partial<UserProfile>): UserProfile => {
-    const user = authService.getCurrentUser();
-    if (!user) throw new Error("No active session found.");
-
-    const updatedUser: UserProfile = { ...user, ...data };
-
-    localStorage.setItem(SESSION_KEY, JSON.stringify(updatedUser));
-
-    const storedUsers = authService.getStoredUsers();
-    const userIndex = storedUsers.findIndex(u => u.id === user.id);
-    
-    if (userIndex !== -1) {
-      storedUsers[userIndex] = updatedUser;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedUsers));
-    } else {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([...storedUsers, updatedUser]));
-    }
-
-    return updatedUser;
+  // This is a local sync helper for UI
+  syncLocalProfile: (profile: UserProfile) => {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(profile));
   },
 
-  logout: () => {
-    localStorage.removeItem(SESSION_KEY);
+  updateProfile: async (data: Partial<UserProfile>): Promise<UserProfile> => {
+    const current = authService.getCurrentUser();
+    if (!current) throw new Error("Not logged in");
+
+    const userRef = doc(db, "users", current.id);
+    await updateDoc(userRef, data);
+
+    const updated = { ...current, ...data };
+    authService.syncLocalProfile(updated);
+    return updated;
+  },
+
+  approveAdmin: async (userId: string) => {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, { isApproved: true });
+  },
+
+  rejectAdmin: async (userId: string) => {
+    // In a real app, you might delete the auth user too
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, { role: 'rejected' });
   }
 };
