@@ -6,7 +6,7 @@
   <title>ANU Devotion Attendance System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Polyfill process.env for browser environments
+    // Polyfill process.env for browser environments to prevent early reference errors
     window.process = window.process || { env: { API_KEY: "" } };
     
     tailwind.config = {
@@ -28,26 +28,15 @@
   <style>
     body { 
       font-family: 'Plus Jakarta Sans', sans-serif; 
-      scroll-behavior: smooth;
       margin: 0;
       padding: 0;
+      background-color: #f8fafc;
     }
     #root {
       min-height: 100vh;
     }
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 10px;
-    }
-    .dark ::-webkit-scrollbar-thumb {
-      background: #334155;
+    .dark body {
+      background-color: #020617;
     }
     .glass-card {
       background: rgba(255, 255, 255, 0.7);
@@ -86,8 +75,9 @@
 }
 </script>
 </head>
-<body class="bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-100 overflow-x-hidden">
+<body class="text-slate-900 dark:text-slate-100 overflow-x-hidden">
   <div id="root"></div>
+  <!-- Entry point for the Vite application -->
   <script type="module" src="/index.tsx"></script>
 </body>
 </html>
