@@ -1,0 +1,7 @@
+{
+  "name": "CHAPLAIN APP",
+  "description": "A comprehensive attendance tracking system for All Nations University devotions and chapel services, featuring mark calculation, AI insights, and administrative dashboards.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
