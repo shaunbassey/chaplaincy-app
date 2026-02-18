@@ -1,10 +1,9 @@
 
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 // Replace with your actual Firebase configuration
-// These should ideally be environment variables
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "your-app.firebaseapp.com",
@@ -14,6 +13,8 @@ const firebaseConfig = {
   appId: "YOUR_APP_ID"
 };
 
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+
 export const auth = getAuth(app);
 export const db = getFirestore(app);
