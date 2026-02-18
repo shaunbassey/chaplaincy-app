@@ -3,9 +3,9 @@ import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// ANU Devotion System Firebase Configuration
+// ANU Devotion System Firebase Configuration updated with user provided key
 const firebaseConfig = {
-  apiKey: "AIzaSyB4aZRqB5llk9VoP40ZBZ9J-8DLIh7zHUw",
+  apiKey: "AIzaSyCaoJEsCSSZT4PhcVROlxkVc2xPUoxmYFQ",
   authDomain: "chaplaincy-app.firebaseapp.com",
   projectId: "chaplaincy-app",
   storageBucket: "chaplaincy-app.firebasestorage.app",
