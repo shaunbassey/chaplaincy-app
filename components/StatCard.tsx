@@ -10,16 +10,18 @@ interface StatCardProps {
 
 export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, color }) => {
   return (
-    <div className="relative group bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-4 md:p-8 rounded-[24px] md:rounded-[40px] shadow-xl border border-white dark:border-slate-800 flex items-center gap-3 md:gap-6 transition-all duration-500 hover:-translate-y-1 md:hover:-translate-y-2 hover:shadow-2xl overflow-hidden active:scale-95">
-      <div className={`absolute -right-4 -bottom-4 opacity-5 group-hover:scale-125 transition-transform duration-700 hidden md:block`}>
-        {icon}
+    <div className="relative group overflow-hidden bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl p-5 md:p-7 rounded-4xl border border-white/50 dark:border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl active:scale-[0.98]">
+      <div className="flex items-start justify-between mb-4">
+        <div className={`${color} p-3 md:p-4 rounded-2xl md:rounded-3xl text-white shadow-lg relative z-10 shrink-0 transform group-hover:scale-110 transition-transform duration-500`}>
+          {React.cloneElement(icon as React.ReactElement, { size: 20 })}
+        </div>
+        <div className="opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-700 absolute -right-6 -top-6">
+           {React.cloneElement(icon as React.ReactElement, { size: 100 })}
+        </div>
       </div>
-      <div className={`${color} p-2.5 md:p-5 rounded-xl md:rounded-[24px] text-white shadow-2xl relative z-10 shrink-0`}>
-        {React.cloneElement(icon as React.ReactElement, { size: 16 })}
-      </div>
-      <div className="relative z-10 overflow-hidden">
-        <p className="text-slate-400 dark:text-slate-500 text-[7px] md:text-[10px] font-black uppercase tracking-widest mb-0.5 md:mb-1 truncate">{label}</p>
-        <p className="text-lg md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter truncate leading-tight">{value}</p>
+      <div className="relative z-10">
+        <p className="text-slate-400 dark:text-slate-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.15em] mb-1">{label}</p>
+        <p className="text-2xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">{value}</p>
       </div>
     </div>
   );
